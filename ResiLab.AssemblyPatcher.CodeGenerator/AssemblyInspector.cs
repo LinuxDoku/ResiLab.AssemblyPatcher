@@ -13,11 +13,16 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         public AssemblyQuery AssemblyQuery;
         public ITypeLoader TypeLoader;
 
-        public AssemblyInspector(string assemblyPath, ITypeLoader typeLoader)
+        public AssemblyInspector(string assemblyPath, ITypeLoader typeLoader=null)
         {
             AssemblyDefinition = AssemblyDefinition.ReadAssembly(assemblyPath);
             TypeLoader = typeLoader;
             AssemblyQuery = new AssemblyQuery(AssemblyDefinition);
+
+            if (TypeLoader == null)
+            {
+                TypeLoader = new TypeLoader();
+            }
         }
 
         /// <summary>
