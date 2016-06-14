@@ -53,5 +53,22 @@ namespace ResiLab.AssemblyPatcher.Tests
             // validate std out
             Assert.AreEqual("Hello WorldHello World\r\n", output);
         }
+
+        [Test]
+        public void Should_Replace_Method_Body_With_Method_Call_And_Method_Call_To_Class_Member() {
+            // patch the assembly
+            var typeLoader = new TypeLoader();
+            var inspector = new AssemblyInspector(SourceFile, typeLoader);
+
+            inspector.Method(x => x.FindMethod("HelloWorld.Program", "Main")).Replace("System.Console.WriteLine(GenerateHelloWorld());");
+
+            inspector.SaveAs(PatchedFile);
+
+            // execute the patched assembly
+            var output = RunExecutable(PatchedFile);
+
+            // validate std out
+            Assert.AreEqual("Hello World\r\n", output);
+        }
     }
 }

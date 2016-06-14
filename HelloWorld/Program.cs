@@ -5,5 +5,10 @@
         public static void Main(string[] args) {
             System.Console.WriteLine(_helloWorld);
         }
+
+        public static string GenerateHelloWorld()
+        {
+            return "Hello World";
+        }
     }
 }

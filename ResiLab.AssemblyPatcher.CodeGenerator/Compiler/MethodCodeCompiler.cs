@@ -12,15 +12,24 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
     /// <summary>
     /// Compile method code to .NET binary and return it as a mono cecil method body, which could be merged into existing assemblies.
     /// </summary>
-    public class MethodCodeCompiler
+    public class MethodCodeCompiler : CompilerBase
     {
+        /// <summary>
+        /// Create a new instance of the MethodCodeCompiler.
+        /// </summary>
+        /// <returns></returns>
+        public static MethodCodeCompiler Create()
+        {
+            return new MethodCodeCompiler();
+        }
+        
         /// <summary>
         /// Compile the C# source code to a new IL MethodBody, which should replace the Body of the passed MethodDefinition.
         /// </summary>
         /// <param name="cSharpMethodBodyCode"></param>
         /// <param name="methodDefinition"></param>
         /// <returns></returns>
-        public static MethodBody Compile(string cSharpMethodBodyCode, MethodDefinition methodDefinition)
+        public MethodBody Compile(string cSharpMethodBodyCode, MethodDefinition methodDefinition)
         {
             var assemblyStream = new MemoryStream();
 
@@ -64,43 +73,17 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
         /// <param name="cSharpMethodCode"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        private static string GenerateProgramCode(string cSharpMethodCode, MethodDefinition method)
+        private string GenerateProgramCode(string cSharpMethodCode, MethodDefinition method)
         {
-            var returnType = method.ReturnType.Name;
-            if (returnType == "Void")
-            {
-                returnType = returnType.ToLowerInvariant();
-            }
+            var body = Format(
+                GenerateFieldStubs(method.DeclaringType),
+                GenerateMethodStubs(method.DeclaringType, x => x.Name == method.Name || x.IsConstructor),
+                $"       public {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}() {{  ",
+                $"           {cSharpMethodCode} ",
+                $"       }} "
+            );
 
-            // generate the namespace, class and method declartion
-            return $"namespace {method.DeclaringType.Namespace} {{ " + Environment.NewLine +
-                   $"   public class {method.DeclaringType.Name} {{ " + Environment.NewLine +
-                   GenerateFields(method) + Environment.NewLine +
-                   $"       public {(method.IsStatic ? "static" : "")} {returnType} {method.Name}() {{  " + Environment.NewLine +
-                   $"           {cSharpMethodCode} " + Environment.NewLine +
-                   $"       }} " + Environment.NewLine +
-                   $"   }} " + Environment.NewLine +
-                   $"}}";
-        }
-
-        /// <summary>
-        /// Generate the fields of the DeclaringType from the MethodDefintion as C# Source code.
-        /// 
-        /// This allows to reference class member fields from the method body.
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private static string GenerateFields(MethodDefinition method)
-        {
-            var builder = new StringBuilder();
-
-            // get all fields from declaring type and generate them
-            foreach (var field in method.DeclaringType.Fields)
-            {
-                builder.AppendLine($"       public {(field.IsStatic ? "static" : "")} {field.FieldType.FullName} {field.Name} = default({field.FieldType.FullName});");
-            }
-
-            return builder.ToString();
+            return GenerateProgramCode(method.DeclaringType, body);
         }
     }
 }

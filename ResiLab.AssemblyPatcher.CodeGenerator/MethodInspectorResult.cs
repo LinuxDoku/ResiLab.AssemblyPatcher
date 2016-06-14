@@ -13,7 +13,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         /// <param name="cSharpCode"></param>
         public override void Replace(string cSharpCode)
         {
-            var il = MethodCodeCompiler.Compile(cSharpCode, Value);
+            var il = MethodCodeCompiler.Create().Compile(cSharpCode, Value);
             var ilProcessor = Value.Body.GetILProcessor();
 
             ReplaceInstructions(ilProcessor, il.Instructions);
