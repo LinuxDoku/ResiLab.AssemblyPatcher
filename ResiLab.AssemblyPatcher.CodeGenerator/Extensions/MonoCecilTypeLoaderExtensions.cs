@@ -16,5 +16,15 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Extensions
         {
             return typeLoader.GetMethod(methodReference.DeclaringType.FullName, methodReference.Name, methodReference.GetParameterTypes(typeLoader));
         }
+
+        /// <summary>
+        /// Get FieldInfo for the passed FieldReference.
+        /// </summary>
+        /// <param name="typeLoader"></param>
+        /// <param name="fieldReference"></param>
+        /// <returns></returns>
+        public static FieldInfo GetField(this ITypeLoader typeLoader, FieldReference fieldReference) {
+            return typeLoader.GetField(fieldReference.DeclaringType.FullName, fieldReference.Name);
+        }
     }
 }

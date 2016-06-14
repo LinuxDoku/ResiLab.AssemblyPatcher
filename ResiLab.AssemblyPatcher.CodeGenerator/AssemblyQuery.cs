@@ -62,5 +62,17 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
             var type = FindType(declaringTypeFullName);
             return type?.Properties.FirstOrDefault(x => x.Name == propertyName);
         }
+
+        /// <summary>
+        /// Find a field by it's declaring type's full name and the field name.
+        /// </summary>
+        /// <param name="declartingTypeFullName"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public FieldDefinition FindField(string declartingTypeFullName, string fieldName)
+        {
+            var type = FindType(declartingTypeFullName);
+            return type?.Fields.FirstOrDefault(x => x.Name == fieldName);
+        }
     }
 }

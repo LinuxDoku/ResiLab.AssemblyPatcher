@@ -22,5 +22,13 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Contracts
         /// <param name="parameterTypes"></param>
         /// <returns></returns>
         MethodBase GetMethod(string declaringTypeFullName, string methodName, Type[] parameterTypes);
+
+        /// <summary>
+        /// Get FieldInfo by the declaring type full naem and the field name.
+        /// </summary>
+        /// <param name="declaringTypeFullName"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        FieldInfo GetField(string declaringTypeFullName, string fieldName);
     }
 }

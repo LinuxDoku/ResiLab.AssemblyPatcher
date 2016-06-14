@@ -42,7 +42,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         }
 
         /// <summary>
-        /// Get MethodBase by the delcaring type information, the method name and it's parameter types.
+        /// Get MethodBase by the delcaring type full name, the method name and it's parameter types.
         /// </summary>
         /// <param name="declaringTypeFullName"></param>
         /// <param name="methodName"></param>
@@ -52,6 +52,18 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         {
             var declaringType = GetType(declaringTypeFullName);
             return declaringType?.GetMethod(methodName, parameterTypes);
+        }
+
+        /// <summary>
+        /// Get FieldInfo by the declaring type full naem and the field name.
+        /// </summary>
+        /// <param name="declaringTypeFullName"></param>
+        /// <param name="fieldName"></param>
+        /// <returns></returns>
+        public FieldInfo GetField(string declaringTypeFullName, string fieldName)
+        {
+            var declaringType = GetType(declaringTypeFullName);
+            return declaringType?.GetField(fieldName);
         }
 
         /// <summary>

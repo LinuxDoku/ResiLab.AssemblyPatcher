@@ -1,40 +1,57 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 using NUnit.Framework;
 using ResiLab.AssemblyPatcher.CodeGenerator;
 
 namespace ResiLab.AssemblyPatcher.Tests
 {
-    public class AssemblyPatcherIntegrationTests
+    public class AssemblyPatcherIntegrationTests : IntegrationTestBase
     {
-        [Test]
-        public void Should_Replace_Method_Body()
-        {
-            var dir = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-            var sourceFile = Path.Combine(dir, "Static/HelloWorld.exe");
-            var patchedFile = Path.Combine(dir, "HelloWorld.Patched.exe");
+        private static readonly string SourceFile = Path.Combine(TestDirectory, "Static/HelloWorld.exe");
+        private static readonly string PatchedFile = Path.Combine(TestDirectory, "HelloWorld.Patched.exe");
 
+        [SetUp]
+        public void Setup()
+        {
+            if (File.Exists(PatchedFile))
+            {
+                File.Delete(PatchedFile);
+            }
+        }
+
+        [Test]
+        public void Should_Replace_Method_Body_With_Method_Call()
+        {
             // patch the assembly
             var typeLoader = new TypeLoader();
-            var inspector = new AssemblyInspector(sourceFile, typeLoader);
+            var inspector = new AssemblyInspector(SourceFile, typeLoader);
 
             inspector.Method(x => x.FindMethod("HelloWorld.Program", "Main")).Replace("System.Console.WriteLine(\"This is a patched Hello World!\");");
 
-            inspector.SaveAs(patchedFile);
+            inspector.SaveAs(PatchedFile);
 
             // execute the patched assembly
-            var process = Process.Start(new ProcessStartInfo {
-                FileName = patchedFile,
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            });
-            process.WaitForExit(1000);
-            var output = process.StandardOutput.ReadToEnd();
+            var output = RunExecutable(PatchedFile);
 
             // validate std out
             Assert.AreEqual("This is a patched Hello World!\r\n", output);
+        }
+
+        [Test]
+        public void Should_Replace_Method_Body_With_Property_Access()
+        {
+            // patch the assembly
+            var typeLoader = new TypeLoader();
+            var inspector = new AssemblyInspector(SourceFile, typeLoader);
+
+            inspector.Method(x => x.FindMethod("HelloWorld.Program", "Main")).Replace("System.Console.WriteLine(_helloWorld + _helloWorld);");
+
+            inspector.SaveAs(PatchedFile);
+
+            // execute the patched assembly
+            var output = RunExecutable(PatchedFile);
+
+            // validate std out
+            Assert.AreEqual("Hello WorldHello World\r\n", output);
         }
     }
 }
