@@ -53,4 +53,5 @@ inspector.SaveAs("HelloWorld.Patched.exe");
 		- [ ] Replace Set Method
 - [ ] Fields
 	- [ ] Add Fields
-	- [ ] Delete Fields
+	- [x] Delete Fields
+	- [ ] Replace Field Value

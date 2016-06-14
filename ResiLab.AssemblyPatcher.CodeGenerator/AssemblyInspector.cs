@@ -45,6 +45,11 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
             return new PropertyInspectorResult(this, query(AssemblyQuery));
         }
 
+        public FieldInspectorResult Field(Func<AssemblyQuery, FieldDefinition> query)
+        {
+            return new FieldInspectorResult(this, query(AssemblyQuery));
+        }
+
         /// <summary>
         /// Save the modified assembly with a new name or at a new path.
         /// </summary>

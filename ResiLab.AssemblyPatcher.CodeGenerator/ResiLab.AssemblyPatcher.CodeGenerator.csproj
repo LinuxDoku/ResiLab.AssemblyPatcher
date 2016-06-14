@@ -80,6 +80,7 @@
     <Compile Include="Extensions\MethodReferenceExtensions.cs" />
     <Compile Include="Extensions\MonoCecilTypeLoaderExtensions.cs" />
     <Compile Include="Compiler\MethodCodeCompiler.cs" />
+    <Compile Include="FieldInspectorResult.cs" />
     <Compile Include="MethodInspectorResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyInspectorResult.cs" />
