@@ -1,6 +1,6 @@
 # ResiLab AssemblyPatcher
-The AssemblyPatcher is under active development, and the aim is to create a tool, which allows
-easy .NET assembly modification without struggling with IL code.
+The AssemblyPatcher is under active development. The aim is to create a tool, which allows
+easy .NET assembly modification without IL code struggling.
 
 Write a query with some easy macro instructions to target the method or field, which should be replaced,
 deleted or add a whole new method to an existing type with plain C# which is compiled by Roslyn.
@@ -26,7 +26,7 @@ Here we delete a method from an assembly:
 ```csharp
 var inspector = new AssemblyInspector("HelloWorld.exe");
 
-inspector.Method(x => x.FindMethod("HelloWorld.Program", "GenerateHelloWorld")).Delete();
+inspector.Method(x => x.FindMethod("HelloWorld.Program", "GenerateHelloWorld")).Remove();
 
 inspector.SaveAs("HelloWorld.Patched.exe");
 ```
