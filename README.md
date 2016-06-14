@@ -26,7 +26,7 @@ Here we delete a method from an assembly:
 ```csharp
 var inspector = new AssemblyInspector("HelloWorld.exe");
 
-inspector.Method(x => x.FindMethod("HelloWorld.Program", "GenerateHelloWorld")).Delete();
+inspector.Method(x => x.FindMethod("HelloWorld.Program", "GenerateHelloWorld")).Remove();
 
 inspector.SaveAs("HelloWorld.Patched.exe");
 ```
