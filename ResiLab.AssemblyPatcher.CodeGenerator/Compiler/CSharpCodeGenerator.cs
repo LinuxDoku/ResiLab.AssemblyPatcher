@@ -12,6 +12,17 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
     /// Maybe add here an interface to support other .NET languages like F# or VB.NET later.
     /// </summary>
     public class CSharpCodeGenerator {
+
+        /// <summary>
+        /// Format a list of members.
+        /// </summary>
+        /// <param name="members"></param>
+        /// <returns></returns>
+        public string Members(params string[] members)
+        {
+            return Format(members);
+        }
+
         /// <summary>
         /// Generate the required program code for an assembly - Namespace, Class and the "class body".
         /// </summary>
@@ -111,7 +122,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
                 methods = methods.Where(x => skip(x) == false);
             }
 
-            return GeneratorUtil.Format(methods.Select(GenerateMethodStub).ToArray());
+            return Format(methods.Select(GenerateMethodStub).ToArray());
         }
 
         /// <summary>
@@ -176,6 +187,15 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
             }
 
             return returnType;
+        }
+
+        /// <summary>
+        /// Format the lines of a source code.
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        private static string Format(params string[] lines) {
+            return string.Join(Environment.NewLine, lines) + Environment.NewLine;
         }
     }
 }

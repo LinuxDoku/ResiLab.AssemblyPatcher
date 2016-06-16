@@ -75,16 +75,14 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
         /// <returns></returns>
         private string GenerateProgramCode(string methodBodyCode, MethodDefinition method)
         {
-            var body = GeneratorUtil.Format(
+            return Generator.GenerateProgram(method.DeclaringType, Generator.Members(
                 // generate required stuff
                 Generator.GenerateFieldStubs(method.DeclaringType),
                 Generator.GenerateMethodStubs(method.DeclaringType, x => x.Name == method.Name || x.IsConstructor),
-                
+
                 // generate method
                 Generator.GenerateMethod(method, methodBodyCode)
-            );
-
-            return Generator.GenerateProgram(method.DeclaringType, body);
+            ));
         }
     }
 }
