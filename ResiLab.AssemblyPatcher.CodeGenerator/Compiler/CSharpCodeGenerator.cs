@@ -3,28 +3,78 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Mono.Cecil;
+using ResiLab.AssemblyPatcher.CodeGenerator.Extensions;
 
-namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
-{
+namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
     /// <summary>
     /// C# Code generator, which converts Mono Cecil References and Definitions into C# Code and allows to inject custom code.
     /// 
     /// Maybe add here an interface to support other .NET languages like F# or VB.NET later.
     /// </summary>
-    public class CSharpCodeGenerator
-    {
+    public class CSharpCodeGenerator {
         /// <summary>
         /// Generate the required program code for an assembly - Namespace, Class and the "class body".
         /// </summary>
-        /// <param name="typeReference"></param>
+        /// <param name="typeDefinition"></param>
         /// <param name="classBody"></param>
         /// <returns></returns>
-        public string GenerateProgram(TypeReference typeReference, string classBody) {
-            return $"namespace {typeReference.Namespace} {{ " + Environment.NewLine +
-                   $"   public class {typeReference.Name} {{ " + Environment.NewLine +
-                   classBody +
-                   $"   }} " + Environment.NewLine +
-                   $"}}";
+        public string GenerateProgram(TypeDefinition typeDefinition, string classBody)
+        {
+            return GenerateNamespace(typeDefinition.Namespace, GenerateClass(typeDefinition, classBody));
+        }
+
+        /// <summary>
+        /// Generate the namespace with body.
+        /// </summary>
+        /// <param name="namespaceName"></param>
+        /// <param name="namespaceBody"></param>
+        /// <returns></returns>
+        public string GenerateNamespace(string namespaceName, string namespaceBody)
+        {
+            var builder = new StringBuilder();
+
+            builder.AppendLine($"namespace {namespaceName} {{");
+            builder.AppendLine(namespaceBody);
+            builder.AppendLine("}");
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Generate the class with body.
+        /// </summary>
+        /// <param name="typeDefinition"></param>
+        /// <param name="classBody"></param>
+        /// <returns></returns>
+        public string GenerateClass(TypeDefinition typeDefinition, string classBody)
+        {
+            var builder = new StringBuilder();
+
+            string inheritance = "";
+
+            // base type
+            if (typeDefinition.BaseType != null && typeDefinition.BaseType.FullName != typeof(object).FullName)
+            {
+                inheritance = " : " + typeDefinition.BaseType.FullName;
+            }
+
+            // interfaces
+            if (typeDefinition.HasInterfaces)
+            {
+                if (inheritance.Length == 0)
+                {
+                    inheritance = " : ";
+                }
+
+                inheritance = inheritance + string.Join(", ", typeDefinition.Interfaces.Select(x => x.FullName));
+            }
+
+            // generate class
+            builder.AppendLine(1, $"public class {typeDefinition.Name}{inheritance} {{");
+            builder.AppendLine(classBody);
+            builder.AppendLine(1, "}");
+
+            return builder.ToString();
         }
 
         /// <summary>
@@ -43,7 +93,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
 
             // generate all fields of this type
             foreach (var field in fields) {
-                builder.AppendLine($"       public {(field.IsStatic ? "static" : "")} {field.FieldType.FullName} {field.Name} = default({field.FieldType.FullName});");
+                builder.AppendLine(2, $"public {(field.IsStatic ? "static" : "")} {field.FieldType.FullName} {field.Name} = default({field.FieldType.FullName});");
             }
 
             return builder.ToString();
@@ -55,8 +105,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
         /// <param name="typeDefinition"></param>
         /// <param name="skip"></param>
         /// <returns></returns>
-        public string GenerateMethodStubs(TypeDefinition typeDefinition, Func<MethodDefinition, bool> skip = null) 
-        {
+        public string GenerateMethodStubs(TypeDefinition typeDefinition, Func<MethodDefinition, bool> skip = null) {
             IEnumerable<MethodDefinition> methods = typeDefinition.Methods;
             if (skip != null) {
                 methods = methods.Where(x => skip(x) == false);
@@ -70,8 +119,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
         /// </summary>
         /// <param name="method"></param>
         /// <returns></returns>
-        public string GenerateMethodStub(MethodDefinition method)
-        {
+        public string GenerateMethodStub(MethodDefinition method) {
             string methodBodyCode = null;
 
             // when the return type is not void, generate default return statement
@@ -92,20 +140,17 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
             var builder = new StringBuilder();
 
             // method declaration
-            builder.AppendLine($"       public {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}({GenerateMethodParameters(method.Parameters)})");
-            
+            builder.AppendLine(2, $"public {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}({GenerateMethodParameters(method.Parameters)})");
+
             // brace and method body
             builder.AppendLine("       {");
-            if (methodBodyCode != null)
-            {
-                builder.AppendLine($"            {methodBodyCode}");
+            if (methodBodyCode != null) {
+                builder.AppendLine(3, methodBodyCode);
             }
-            builder.AppendLine("       }");
+            builder.AppendLine(2, "}");
 
             return builder.ToString();
         }
-
-
 
         /// <summary>
         /// Generate the parameters of a method.
