@@ -70,20 +70,21 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
         /// The MethodDefinition is used to generate namespace, class and members exactly to the original assembly.
         /// Then the generated source code can have references to all class members.
         /// </summary>
-        /// <param name="cSharpMethodCode"></param>
+        /// <param name="methodBodyCode"></param>
         /// <param name="method"></param>
         /// <returns></returns>
-        private string GenerateProgramCode(string cSharpMethodCode, MethodDefinition method)
+        private string GenerateProgramCode(string methodBodyCode, MethodDefinition method)
         {
-            var body = Format(
-                GenerateFieldStubs(method.DeclaringType),
-                GenerateMethodStubs(method.DeclaringType, x => x.Name == method.Name || x.IsConstructor),
-                $"       public {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}() {{  ",
-                $"           {cSharpMethodCode} ",
-                $"       }} "
+            var body = GeneratorUtil.Format(
+                // generate required stuff
+                Generator.GenerateFieldStubs(method.DeclaringType),
+                Generator.GenerateMethodStubs(method.DeclaringType, x => x.Name == method.Name || x.IsConstructor),
+                
+                // generate method
+                Generator.GenerateMethod(method, methodBodyCode)
             );
 
-            return GenerateProgramCode(method.DeclaringType, body);
+            return Generator.GenerateProgram(method.DeclaringType, body);
         }
     }
 }
