@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using Mono.Cecil;
 using ResiLab.AssemblyPatcher.CodeGenerator.Extensions;
 
@@ -79,9 +81,9 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
 
                 inheritance = inheritance + string.Join(", ", typeDefinition.Interfaces.Select(x => x.FullName));
             }
-
+            
             // generate class
-            builder.AppendLine(1, $"public class {typeDefinition.Name}{inheritance} {{");
+            builder.AppendLine(1, $"{(typeDefinition.IsPublic ? "public" : "private")} class {typeDefinition.Name}{inheritance} {{");
             builder.AppendLine(classBody);
             builder.AppendLine(1, "}");
 
@@ -104,7 +106,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
 
             // generate all fields of this type
             foreach (var field in fields) {
-                builder.AppendLine(2, $"public {(field.IsStatic ? "static" : "")} {field.FieldType.FullName} {field.Name} = default({field.FieldType.FullName});");
+                builder.AppendLine(2, $"{(field.IsPublic ? "public" : "private")} {(field.IsStatic ? "static" : "")} {field.FieldType.FullName} {field.Name} = default({field.FieldType.FullName});");
             }
 
             return builder.ToString();
@@ -151,7 +153,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
             var builder = new StringBuilder();
 
             // method declaration
-            builder.AppendLine(2, $"public {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}({GenerateMethodParameters(method.Parameters)})");
+            builder.AppendLine(2, $"{ToAccessor(method.ToAccessibility())} {(method.IsVirtual ? "virtual" : "")} {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}({GenerateMethodParameters(method.Parameters)})");
 
             // brace and method body
             builder.AppendLine("       {");
@@ -170,6 +172,25 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
         /// <returns></returns>
         protected string GenerateMethodParameters(IEnumerable<ParameterDefinition> parameters) {
             return string.Join(", ", parameters.Select(x => $"{x.ParameterType.FullName} {x.Name}"));
+        }
+
+        protected string ToAccessor(Accessibility accessibility)
+        {
+            switch (accessibility)
+            {
+                case Accessibility.Private:
+                    return "private";
+                
+                case Accessibility.Internal:
+                    return "internal";
+                
+                case Accessibility.Protected:
+                    return "protected";
+
+                case Accessibility.Public:
+                default:
+                    return "public";
+            }
         }
 
         /// <summary>

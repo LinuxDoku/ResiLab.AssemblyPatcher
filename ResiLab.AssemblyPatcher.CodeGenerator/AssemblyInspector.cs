@@ -45,6 +45,11 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
             return new PropertyInspectorResult(this, query(AssemblyQuery));
         }
 
+        /// <summary>
+        /// Query a field and provide code modification tools.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public FieldInspectorResult Field(Func<AssemblyQuery, FieldDefinition> query)
         {
             return new FieldInspectorResult(this, query(AssemblyQuery));

@@ -78,6 +78,7 @@
     <Compile Include="Compiler\CompilerBase.cs" />
     <Compile Include="Compiler\CSharpCodeGenerator.cs" />
     <Compile Include="Contracts\ITypeLoader.cs" />
+    <Compile Include="Extensions\MethodDefinitionExtensions.cs" />
     <Compile Include="Extensions\MethodReferenceExtensions.cs" />
     <Compile Include="Extensions\MonoCecilTypeLoaderExtensions.cs" />
     <Compile Include="Compiler\MethodCodeCompiler.cs" />
