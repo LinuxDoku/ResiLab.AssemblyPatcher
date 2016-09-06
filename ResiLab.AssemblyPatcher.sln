@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResiLab.AssemblyPatcher", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HelloWorld", "HelloWorld\HelloWorld.csproj", "{A38CA0F1-179E-42D6-9234-2969F8BE533D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9F8E2BDC-249B-409F-8817-048ADE5C6203}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestApps", "TestApps", "{9F8E2BDC-249B-409F-8817-048ADE5C6203}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResiLab.AssemblyPatcher.CodeGenerator", "ResiLab.AssemblyPatcher.CodeGenerator\ResiLab.AssemblyPatcher.CodeGenerator.csproj", "{A6061745-120A-403D-BAAD-A267C10470A0}"
 EndProject

@@ -4,6 +4,7 @@ using ResiLab.AssemblyPatcher.CodeGenerator;
 
 namespace ResiLab.AssemblyPatcher.Tests
 {
+    [TestFixture(Category = "AssemblyPatcherIntegration")]
     public class AssemblyPatcherIntegrationTests : IntegrationTestBase
     {
         private static readonly string SourceFile = Path.Combine(TestDirectory, "Static/HelloWorld.exe");
@@ -69,6 +70,25 @@ namespace ResiLab.AssemblyPatcher.Tests
 
             // validate std out
             Assert.AreEqual("Hello World\r\n", output);
+        }
+
+        [Test]
+        public void Should_Replace_Property_Getter_Body()
+        {
+            // patch the assembly
+            var typeLoader = new TypeLoader();
+            var inspector = new AssemblyInspector(SourceFile, typeLoader);
+
+            inspector.Property(x => x.FindProperty("HelloWorld.Program", "HelloWorldProperty")).ReplaceGet("return \"This is a Test\";");
+            inspector.Method(x => x.FindMethod("HelloWorld.Program", "Main")).Replace("System.Console.WriteLine(HelloWorldProperty);");
+
+            inspector.SaveAs(PatchedFile);
+
+            // execute the patched assembly
+            var output = RunExecutable(PatchedFile);
+
+            // validate std out
+            Assert.AreEqual("This is a Test\r\n", output);
         }
     }
 }

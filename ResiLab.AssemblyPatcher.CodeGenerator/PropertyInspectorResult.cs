@@ -6,12 +6,24 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
     {
         public PropertyInspectorResult(AssemblyInspector inspector, PropertyDefinition value) : base(inspector, value) {}
 
-        public override void Replace(string cSharpCode)
+        /// <summary>
+        /// Replace the body of the getter.
+        /// </summary>
+        /// <param name="cSharpCode"></param>
+        public void ReplaceGet(string cSharpCode)
         {
-            // TODO: implement code generation for properties
-            throw new System.NotImplementedException();
+            ReplaceMethodBody(Value.GetMethod, cSharpCode);
         }
 
+        /// <summary>
+        /// Replace the body of the setter.
+        /// </summary>
+        /// <param name="cSharpCode"></param>
+        public void ReplaceSet(string cSharpCode)
+        {
+            ReplaceMethodBody(Value.SetMethod, cSharpCode);
+        }
+        
         public override void Remove()
         {
             Value.DeclaringType.Properties.Remove(Value);

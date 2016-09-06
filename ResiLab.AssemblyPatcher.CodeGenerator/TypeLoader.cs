@@ -10,7 +10,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
     /// <summary>
     /// Used to load types while compiling or generating references to existing source code.
     /// 
-    /// This loader should contain all relevant refrences. Otherwise the code generation will not work.
+    /// This loader should contain all relevant references. Otherwise the code generation will not work.
     /// </summary>
     public class TypeLoader : ITypeLoader
     {

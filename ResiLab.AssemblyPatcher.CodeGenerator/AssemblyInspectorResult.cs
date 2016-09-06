@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using ResiLab.AssemblyPatcher.CodeGenerator.Compiler;
 using ResiLab.AssemblyPatcher.CodeGenerator.Extensions;
 
 namespace ResiLab.AssemblyPatcher.CodeGenerator
@@ -30,15 +31,22 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         public T Value { get; }
 
         /// <summary>
-        /// Replace the Member code with the given C# code.
-        /// </summary>
-        /// <param name="cSharpCode"></param>
-        public abstract void Replace(string cSharpCode);
-
-        /// <summary>
         /// Remove the Member from the assembly.
         /// </summary>
         public abstract void Remove();
+
+        /// <summary>
+        /// Replace the method body of the passed method defintion with the compiled cSharpCode.
+        /// </summary>
+        /// <param name="methodDefintion"></param>
+        /// <param name="cSharpCode"></param>
+        protected void ReplaceMethodBody(MethodDefinition methodDefintion, string cSharpCode) 
+        {
+            var il = MethodCodeCompiler.Create().Compile(cSharpCode, methodDefintion);
+            var ilProcessor = methodDefintion.Body.GetILProcessor();
+
+            ReplaceInstructions(ilProcessor, il.Instructions);
+        }
 
         /// <summary>
         /// Replace the IL Instructions of the ILProcessor body with the passed instructions.

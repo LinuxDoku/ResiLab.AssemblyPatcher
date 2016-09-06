@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Mono.Cecil;
@@ -13,7 +14,8 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
     /// 
     /// Maybe add here an interface to support other .NET languages like F# or VB.NET later.
     /// </summary>
-    public class CSharpCodeGenerator {
+    public class CSharpCodeGenerator 
+    {
 
         /// <summary>
         /// Format a list of members.
@@ -99,7 +101,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
         public string GenerateFieldStubs(TypeDefinition typeDefinition, Func<FieldDefinition, bool> skip = null) {
             var builder = new StringBuilder();
 
-            IEnumerable<FieldDefinition> fields = typeDefinition.Fields;
+            IEnumerable<FieldDefinition> fields = WithoutCompilerGenerated(typeDefinition.Fields);
             if (skip != null) {
                 fields = fields.Where(x => skip(x) == false);
             }
@@ -112,6 +114,40 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
             return builder.ToString();
         }
 
+        public string GeneratePropertyStubs(TypeDefinition typeDefinition, Func<PropertyDefinition, bool> skip = null)
+        {
+            var builder = new StringBuilder();
+
+            var properties = WithoutCompilerGenerated(typeDefinition.Properties);
+            if (skip != null)
+            {
+                properties = properties.Where(x => skip(x) == false);
+            }
+
+            foreach (var property in properties)
+            {
+                var isPublic = property.GetMethod != null && property.GetMethod.IsPublic || property.SetMethod != null && property.SetMethod.IsPublic;
+                var isStatic = property.GetMethod != null && property.GetMethod.IsStatic || property.SetMethod != null && property.SetMethod.IsStatic;
+
+                builder.AppendLine(2, $"{(isPublic ? "public" : "private")} {(isStatic ? "static" : "")} {property.PropertyType.FullName} {property.Name}");
+                builder.AppendLine(2, "{");
+
+                if (property.GetMethod != null)
+                {
+                    builder.AppendLine(3, $"{(property.GetMethod.IsPrivate ?  "private" : "")} get {{ return default({property.PropertyType.FullName}); }} ");
+                }
+
+                if (property.SetMethod != null)
+                {
+                    builder.AppendLine(3, $"{(property.SetMethod.IsPrivate ? "private" : "")} set {{ }}");
+                }
+
+                builder.AppendLine(2, "}");
+            }
+
+            return builder.ToString();
+        }
+
         /// <summary>
         /// Generate methods of the type with default return as source code, except the skipped.
         /// </summary>
@@ -119,7 +155,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
         /// <param name="skip"></param>
         /// <returns></returns>
         public string GenerateMethodStubs(TypeDefinition typeDefinition, Func<MethodDefinition, bool> skip = null) {
-            IEnumerable<MethodDefinition> methods = typeDefinition.Methods;
+            IEnumerable<MethodDefinition> methods = WithoutCompilerGenerated(typeDefinition.Methods);
             if (skip != null) {
                 methods = methods.Where(x => skip(x) == false);
             }
@@ -153,6 +189,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
             var builder = new StringBuilder();
 
             // method declaration
+            //builder.AppendLine(2, GenerateAttributes(method));
             builder.AppendLine(2, $"{ToAccessor(method.ToAccessibility())} {(method.IsVirtual ? "virtual" : "")} {(method.IsStatic ? "static" : "")} {ConvertType(method.ReturnType)} {method.Name}({GenerateMethodParameters(method.Parameters)})");
 
             // brace and method body
@@ -172,6 +209,11 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
         /// <returns></returns>
         protected string GenerateMethodParameters(IEnumerable<ParameterDefinition> parameters) {
             return string.Join(", ", parameters.Select(x => $"{x.ParameterType.FullName} {x.Name}"));
+        }
+
+        protected IEnumerable<T> WithoutCompilerGenerated<T>(IEnumerable<T> list) where T : ICustomAttributeProvider
+        {
+            return list.Where(x => x.HasCustomAttributes == false || x.CustomAttributes.Any(y => y.AttributeType.FullName != typeof(CompilerGeneratedAttribute).FullName)); 
         }
 
         protected string ToAccessor(Accessibility accessibility)
@@ -208,6 +250,18 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler {
             }
 
             return returnType;
+        }
+
+        protected string GenerateAttributes(ICustomAttributeProvider customAttributeProvider)
+        {
+            var builder = new StringBuilder();
+
+            foreach (var attribute in customAttributeProvider.CustomAttributes)
+            {
+                builder.AppendLine($"[{attribute.AttributeType.FullName}]"); // TODO add arguments
+            }
+
+            return builder.ToString();
         }
 
         /// <summary>

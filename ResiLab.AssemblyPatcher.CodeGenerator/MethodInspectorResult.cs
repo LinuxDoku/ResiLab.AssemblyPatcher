@@ -11,12 +11,9 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator
         /// Replace the Member code with the given C# code.
         /// </summary>
         /// <param name="cSharpCode"></param>
-        public override void Replace(string cSharpCode)
+        public void Replace(string cSharpCode)
         {
-            var il = MethodCodeCompiler.Create().Compile(cSharpCode, Value);
-            var ilProcessor = Value.Body.GetILProcessor();
-
-            ReplaceInstructions(ilProcessor, il.Instructions);
+            ReplaceMethodBody(Value, cSharpCode);
         }
 
         /// <summary>

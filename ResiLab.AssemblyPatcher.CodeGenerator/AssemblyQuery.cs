@@ -5,7 +5,7 @@ using Mono.Cecil;
 namespace ResiLab.AssemblyPatcher.CodeGenerator
 {
     /// <summary>
-    /// Query the AssemblyDefinition with some easy to use method.
+    /// Query the AssemblyDefinition with some easy to use methods.
     /// </summary>
     public class AssemblyQuery
     {

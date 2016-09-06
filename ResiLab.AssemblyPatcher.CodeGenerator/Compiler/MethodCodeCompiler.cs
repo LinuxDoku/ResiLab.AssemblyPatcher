@@ -78,6 +78,7 @@ namespace ResiLab.AssemblyPatcher.CodeGenerator.Compiler
             return Generator.GenerateProgram(method.DeclaringType, Generator.Members(
                 // generate required stuff
                 Generator.GenerateFieldStubs(method.DeclaringType),
+                Generator.GeneratePropertyStubs(method.DeclaringType, x => method.IsGetter && x.Name == method.Name.Replace("get_", "")),
                 Generator.GenerateMethodStubs(method.DeclaringType, x => x.Name == method.Name || x.IsConstructor),
 
                 // generate method
