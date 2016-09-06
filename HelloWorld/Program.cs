@@ -2,7 +2,7 @@
     public class Program {
         private static string _helloWorld = "Hello World";
         
-        public static string HelloWorldProperty { get { return "This is a Test"; } set {} }
+        public static string HelloWorldProperty { get; set; }
 
         public static void Main(string[] args) {
             System.Console.WriteLine(_helloWorld);
